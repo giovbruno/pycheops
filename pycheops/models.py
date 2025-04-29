@@ -34,11 +34,11 @@ from .funcs import t2z, xyz_planet, vrad, tzero2tperi, esolve
 from scipy.optimize import brent, brentq
 from collections import OrderedDict
 from asteval import Interpreter
-from pycheops.constants import c 
+from pycheops.constants import c
 
 c_light = c/1000 # km/s
 
-__all__ = ['qpower2', 'ueclipse', 'TransitModel', 'EclipseModel', 
+__all__ = ['qpower2', 'ueclipse', 'TransitModel', 'EclipseModel',
            'FactorModel', 'ThermalPhaseModel', 'ReflectionModel',
            'RVModel', 'RVCompanion','EBLMModel', 'PlanetModel',
            'SpotCrossingModel','TransitModel1Spot', 'TransitModel2Spot',
@@ -59,14 +59,14 @@ def qpower2(z,k,c,a):
 
     **N.B.** qpower2 is untested/inaccurate for values of k > 0.2
 
-    .. [2] Maxted, P.F.L. & Gill, S., 2019A&A...622A..33M 
+    .. [2] Maxted, P.F.L. & Gill, S., 2019A&A...622A..33M
 
     :param z: star-planet separation on the sky cf. star radius (array)
-    :param k: planet-star radius ratio (scalar, k<1) 
+    :param k: planet-star radius ratio (scalar, k<1)
     :param c: power-2 limb darkening coefficient
     :param a: power-2 limb darkening exponent
 
-    :returns: light curve (observed flux)  
+    :returns: light curve (observed flux)
 
     :Example:
 
@@ -116,15 +116,15 @@ def qpower2(z,k,c,a):
             a0 = b0 + b1*(zt-ra) + b2*(zt-ra)**2
             a1 = b1+2*b2*(zt-ra)
             aq = np.arccos(q)
-            J1 = ( (a0*(d-zt)-(2/3)*a1*w2 + 
+            J1 = ( (a0*(d-zt)-(2/3)*a1*w2 +
                 0.25*b2*(d-zt)*(2*(d-zt)**2-k**2))*w
                  + (a0*k**2 + 0.25*b2*k**4)*aq )
             J2 = a*c*sa**(g-1)*k**4*(
                 0.125*aq + (1/12)*q*(q**2-2.5)*np.sqrt(max(0.,1-q**2)) )
             d0 = 1 - c + c*sb**g
             d1 = -a*c*rb*sb**(g-1)
-            K1 = ((d0-rb*d1)*np.arccos(d) + 
-                    ((rb*d+(2/3)*(1-d**2))*d1 - d*d0) * 
+            K1 = ((d0-rb*d1)*np.arccos(d) +
+                    ((rb*d+(2/3)*(1-d**2))*d1 - d*d0) *
                     np.sqrt(max(0.,1-d**2)) )
             K2 = (1/3)*c*a*sb**(g+0.5)*(1-d)
             f[i] = 1 - I_0*(J1 - J2 + K1 - K2)
@@ -162,7 +162,7 @@ def scaled_transit_fit(flux, sigma, model):
     chisq = np.sum(w*((flux-1)-s*(model-1))**2)
     b = np.sqrt(chisq/N)
     sigma_s = b/np.sqrt(_m)
-    _t = 3*chisq/b**4 - N/b**2 
+    _t = 3*chisq/b**4 - N/b**2
     if _t > 0:
         sigma_b = 1/np.sqrt(_t)
     else:
@@ -181,7 +181,7 @@ def minerr_transit_fit(flux, sigma, model):
     distribution for the true standard errors is assumed to be
 
     .. math::
-        P(\sigma_{\rm true} | \sigma) = \sigma/\sigma_{\rm true}^2 
+        P(\sigma_{\rm true} | \sigma) = \sigma/\sigma_{\rm true}^2
 
     :param flux: Array of normalised flux measurements
 
@@ -255,9 +255,9 @@ def ueclipse(z,k):
     Eclipse light curve for a planet with uniform surface brightness by a star
 
     :param z: star-planet separation on the sky cf. star radius (array)
-    :param k: planet-star radius ratio (scalar, k<1) 
+    :param k: planet-star radius ratio (scalar, k<1)
 
-    :returns: light curve (observed flux from eclipsed source)  
+    :returns: light curve (observed flux from eclipsed source)
     """
     if (k > 1):
         raise ValueError("ueclipse requires k < 1")
@@ -291,7 +291,7 @@ class TransitModel(Model):
     :param f_s:  - sqrt(ecc)*sin(omega)
     :param h_1:  - I(0.5) = 1 - c*(1-0.5**alpha)
     :param h_2:  - I(0.5) - I(0) = c*0.5**alpha
-    :param l_3:  - Third light 
+    :param l_3:  - Third light
 
     Limb-darkening is described by the power-2 law:
 
@@ -306,12 +306,12 @@ class TransitModel(Model):
 
     The following parameters are defined for convenience:
 
-    * k = R_p/R_s; 
-    * aR = a/R_s; 
+    * k = R_p/R_s;
+    * aR = a/R_s;
     * rho = 0.013418*aR**3/(P/d)**2.
 
-    **N.B.** the mean stellar density in solar units is rho, but only if the 
-    mass ratio q = M_planet/M_star is q << 1. 
+    **N.B.** the mean stellar density in solar units is rho, but only if the
+    mass ratio q = M_planet/M_star is q << 1.
 
     The flux value outside of transit is 1. The light curve is calculated using
     the qpower2 algorithm, which is fast but only accurate for k < ~0.3.
@@ -381,7 +381,7 @@ class TransitModel(Model):
         expr = "({p:s}h_1-{p:s}h_2)/(1-{p:s}h_2)".format(p=self.prefix)
         self.set_param_hint(f'{p}q_2',min=0,max=1,expr=expr)
         expr = "sqrt({p:s}D)".format(p=self.prefix)
-        self.set_param_hint(f'{p}k'.format(p=self.prefix), 
+        self.set_param_hint(f'{p}k'.format(p=self.prefix),
                 expr=expr, min=0, max=0.5)
         expr ="sqrt((1+{p:s}k)**2-{p:s}b**2)/{p:s}W/pi".format(p=self.prefix)
         self.set_param_hint(f'{p}aR',min=1, expr=expr)
@@ -400,18 +400,18 @@ class TransitModel1Spot(Model):
     N.B. there will be a systematic error in D due to unocculted spots - see
     Czesla et al. (2009A&A...505.1277C), Oshagh et al. (2013A&A...556A..19O).
 
-    The parameters for the spot crossing event are 
+    The parameters for the spot crossing event are
 
     :param t1: - mid-point of spot crossing event
     :param c1: - contrast factor for spot crossing event (0 <= c1 <= 1)
-    :param w1: - half-width of spot crossing event (w1 > 0) 
+    :param w1: - half-width of spot crossing event (w1 > 0)
     :param f1: - flattening parameter (0 <= f1 <= 1)
-    :param s1: - skew parameter (-1 <= s1 <= 1) 
+    :param s1: - skew parameter (-1 <= s1 <= 1)
 
     The amplitude of the spot crossing event is specified as a factor of the
     flux drop due to the transit of the star by the companion using the
     contrast factor, c1, i.e. a1=c1*D, so if c1=1 then the flux at the peak of
-    the spot crossing event will return to the out-of-transit level. 
+    the spot crossing event will return to the out-of-transit level.
 
     See SpotCrossingModel for more details of the spot crossing model.
 
@@ -456,7 +456,7 @@ class TransitModel1Spot(Model):
             r = qpower2(z, k, c_2, a_2)
             # Check this is not an eclipse of the companion
             z1,m1 = t2z(t1, T_0, P, sini, r_star, ecc, om, returnMask = True)
-            if ~m1: 
+            if ~m1:
                 d = (t-t1)/w1
                 j = abs(d) < 1
                 dj = d[j]
@@ -488,7 +488,7 @@ class TransitModel1Spot(Model):
         expr = "({p:s}h_1-{p:s}h_2)/(1-{p:s}h_2)".format(p=self.prefix)
         self.set_param_hint(f'{p}q_2',min=0,max=1,expr=expr)
         expr = "sqrt({p:s}D)".format(p=self.prefix)
-        self.set_param_hint(f'{p}k'.format(p=self.prefix), 
+        self.set_param_hint(f'{p}k'.format(p=self.prefix),
                 expr=expr, min=0, max=0.5)
         expr ="sqrt((1+{p:s}k)**2-{p:s}b**2)/{p:s}W/pi".format(p=self.prefix)
         self.set_param_hint(f'{p}aR',min=1, expr=expr)
@@ -513,17 +513,17 @@ class TransitModel2Spot(Model):
     N.B. there will be a systematic error in D due to unocculted spots - see
     Czesla et al. (2009A&A...505.1277C), Oshagh et al. (2013A&A...556A..19O).
 
-    The parameters for the spot crossing events are 
+    The parameters for the spot crossing events are
 
     :param t1:     - mid-point of spot crossing event 1
     :param a1:     - amplitude of spot crossing event 1
-    :param w1:     - half-width of spot crossing event 1 
-    :param f1:     - flattening parameter for spot crossing event 1 
+    :param w1:     - half-width of spot crossing event 1
+    :param f1:     - flattening parameter for spot crossing event 1
     :param s1:     - skew parameter for spot crossing event 1
     :param t2:     - mid-point of spot crossing event 2
     :param a2:     - amplitude of spot crossing event 2
-    :param w2:     - half-width of spot crossing event 2 
-    :param f2:     - flattening parameter for spot crossing event 2 
+    :param w2:     - half-width of spot crossing event 2
+    :param f2:     - flattening parameter for spot crossing event 2
     :param s2:     - skew parameter for spot crossing event 2
 
     See SpotCrossingModel for more details of this model.
@@ -573,13 +573,13 @@ class TransitModel2Spot(Model):
             r = qpower2(z, k, c_2, a_2)
             # Check this is not an eclipse of the companion
             z1,m1 = t2z(t1, T_0, P, sini, r_star, ecc, om, returnMask = True)
-            if ~m1: 
+            if ~m1:
                 d = (t-t1)/w1
                 j = abs(d) < 1
                 dj = d[j]
                 r[j] += c1*(1-r[j])*(1 + s1*(dj**3-dj)-(1-f1)*dj**2 - f1*dj**8)
             z2,m2 = t2z(t2, T_0, P, sini, r_star, ecc, om, returnMask = True)
-            if ~m2: 
+            if ~m2:
                 d = (t-t2)/w2
                 j = abs(d) < 1
                 dj = d[j]
@@ -611,7 +611,7 @@ class TransitModel2Spot(Model):
         expr = "({p:s}h_1-{p:s}h_2)/(1-{p:s}h_2)".format(p=self.prefix)
         self.set_param_hint(f'{p}q_2',min=0,max=1,expr=expr)
         expr = "sqrt({p:s}D)".format(p=self.prefix)
-        self.set_param_hint(f'{p}k'.format(p=self.prefix), 
+        self.set_param_hint(f'{p}k'.format(p=self.prefix),
                 expr=expr, min=0, max=0.5)
         expr ="sqrt((1+{p:s}k)**2-{p:s}b**2)/{p:s}W/pi".format(p=self.prefix)
         self.set_param_hint(f'{p}aR',min=1, expr=expr)
@@ -646,7 +646,7 @@ class EclipseModel(Model):
     :param f_c: - sqrt(ecc).cos(omega)
     :param f_s: - sqrt(ecc).sin(omega)
     :param a_c: - correction for light travel time across the orbit
-    :param l_3:  - Third light 
+    :param l_3:  - Third light
 
     The transit depth, width shape are parameterised by D, W and b. These
     parameters are defined above in terms of the radius of the star and
@@ -664,12 +664,12 @@ class EclipseModel(Model):
 
     The following parameters are defined for convenience:
 
-    * k = R_p/R_s; 
-    * aR = a/R_s; 
+    * k = R_p/R_s;
+    * aR = a/R_s;
     * rho = 0.013418*aR**3/(P/d)**2.
 
     **N.B.** the mean stellar density in solar units is rho, but only if the
-    mass ratio q = M_planet/M_star is q << 1. 
+    mass ratio q = M_planet/M_star is q << 1.
 
     Third light is a constant added to the light curve and the fluxes are
     re-normalised, i.e. EclipseModel = (light_curve + l_3)/(1+l_3)
@@ -684,7 +684,7 @@ class EclipseModel(Model):
         def _eclipse_func(t, T_0, P, D, W, b, L, f_c, f_s, a_c, l_3):
             if (D <= 0) or (D > 0.25) or (W <= 0) or (b < 0):
                 return np.ones_like(t)
-            if (L <= 0) or (L >= 1): 
+            if (L <= 0) or (L >= 1):
                 return np.ones_like(t)
             if ((1-abs(f_c)) <= 0) or ((1-abs(f_s)) <= 0):
                 return np.ones_like(t)
@@ -743,8 +743,9 @@ class FactorModel(Model):
                dfdx*dx(t) + dfdy*dy(t) +
                d2fdx2*dx(t)**2 + d2f2y2*dy(t)**2 + d2fdxdy*dx(t)*dy(t) +
                dfdsinphi*sin(phi(t)) + dfdcosphi*cos(phi(t)) +
-               dfdsin2phi*sin(2.phi(t)) + dfdcos2phi*cos(2.phi(t)) + 
-               dfdsin3phi*sin(3.phi(t)) + dfdcos3phi*cos(3.phi(t)) + ..) 
+               dfdsin2phi*sin(2.phi(t)) + dfdcos2phi*cos(2.phi(t)) +
+               dfdsin3phi*sin(3.phi(t)) + dfdcos3phi*cos(3.phi(t)) + ..)
+    + ADDED ADDITIONAL HARMONICS 29/4/25
 
     The detrending coefficients dfdx, etc. are 0 and fixed by default. If any
     of the coefficients dfdx, d2fdxdy or d2f2x2 is not 0, a function to
@@ -773,13 +774,14 @@ class FactorModel(Model):
                        'independent_vars': independent_vars})
 
         def factor(t, c=1.0,dfdt=0, d2fdt2=0, dfdbg=0,
-                dfdcontam=0, dfdsmear=0, ramp=0, 
+                dfdcontam=0, dfdsmear=0, ramp=0,
                 dfdx=0, dfdy=0, d2fdxdy=0, d2fdx2=0, d2fdy2=0,
                 dfdcosphi=0, dfdsinphi=0, dfdcos2phi=0, dfdsin2phi=0,
-                dfdcos3phi=0, dfdsin3phi=0, **kwargs):
+                dfdcos3phi=0, dfdsin3phi=0, dfdcos4phi=0, dfdsin4phi=0,
+                dfdcos5phi=0, dfdsin5phi=0, **kwargs):
 
             dt = t - np.median(t)
-            trend = 1 + dfdt*dt + d2fdt2*dt**2 
+            trend = 1 + dfdt*dt + d2fdt2*dt**2
             if dfdbg != 0:
                 trend += dfdbg*self.bg(t)
             if dfdcontam != 0:
@@ -795,7 +797,9 @@ class FactorModel(Model):
             if d2fdxdy != 0 :
                 trend += d2fdxdy*self.dx(t)*self.dy(t)
             if (dfdsinphi != 0 or dfdsin2phi != 0 or dfdsin3phi != 0 or
-                dfdcosphi != 0 or dfdcos2phi != 0 or dfdcos3phi != 0):
+                dfdsin4phi != 0 or dfdsin5phi != 0 or
+                dfdcosphi != 0 or dfdcos2phi != 0 or dfdcos3phi != 0 or
+                dfdcos4phi != 0 or dfdcos5phi != 0):
                 sinphit = self.sinphi(t)
                 cosphit = self.cosphi(t)
                 trend += dfdsinphi*sinphit + dfdcosphi*cosphit
@@ -807,6 +811,7 @@ class FactorModel(Model):
                     trend += dfdsin3phi*(3*sinphit - 4* sinphit**3)
                 if dfdcos3phi != 0:
                     trend += dfdcos3phi*(4*cosphit**3 - 3*cosphit)
+
 
             for p in self.extra_basis_funcs:
                 trend += kwargs['dfd'+p]*self.extra_basis_funcs[p](t)
@@ -824,11 +829,11 @@ class FactorModel(Model):
         self.cosphi = cosphi
         self.set_param_hint('c', min=0)
         for p in ['dfdt', 'd2fdt2', 'dfdbg', 'dfdcontam', 'dfdsmear',
-                  'dfdx', 'dfdy', 'd2fdx2', 'd2fdxdy',  'd2fdy2', 'ramp', 
+                  'dfdx', 'dfdy', 'd2fdx2', 'd2fdxdy',  'd2fdy2', 'ramp',
                   'dfdsinphi', 'dfdcosphi', 'dfdcos2phi', 'dfdsin2phi',
                   'dfdcos3phi', 'dfdsin3phi']:
             self.set_param_hint(p, value=0, vary=False)
-        
+
         # Extra basis functions
         if extra_basis_funcs == None:
             self.extra_basis_funcs = {}
@@ -844,7 +849,7 @@ class FactorModel(Model):
 
         pars['%sc' % self.prefix].set(value=data.median())
         for p in ['dfdt', 'd2fdt2' 'dfdbg', 'dfdcontam', 'dfdsmear',
-                'dfdx', 'dfdy', 'd2fdx2', 'd2fdy2', 
+                'dfdx', 'dfdy', 'd2fdx2', 'd2fdy2',
                 'dfdsinphi', 'dfdcosphi', 'dfdcos2phi', 'dfdsin2phi',
                 'dfdcos3phi', 'dfdsin3phi']:
             pars['{}{}'.format(self.prefix, p)].set(value = 0.0, vary=False)
@@ -917,7 +922,7 @@ class ReflectionModel(Model):
 
     .. math::
         A_g(R_p/r)^2  \times  [\sin(\beta) + (\pi-\beta)*\cos(\beta) ]/\pi
- 
+
     The eccentricity and longitude of periastron for the planet's orbit are
     ecc and omega, respectively.
 
@@ -999,18 +1004,18 @@ class RVModel(Model):
             if ecc > 0.95 : return np.zeros_like(t)
             omega = np.arctan2(f_s, f_c)
             omdeg = omega*180/np.pi
-            
+
             if q == 0:
                 return V_0 + vrad(t, T_0, P, K, ecc, omdeg, sini, primary=True)
-            
+
             tp = tzero2tperi(T_0,P,sini,ecc,omdeg)
             M = 2*np.pi*(t-tp)/P
             E = esolve(M,ecc)
             nu = 2*np.arctan(np.sqrt((1+ecc)/(1-ecc))*np.tan(E/2))
             vr_nonrel =  V_0 + K*(np.cos(nu+omega) + ecc*np.cos(omega))
             delta_LT = K**2*np.sin(nu+omega)**2*(1+ecc*np.cos(nu))/c_light
-            delta_TD = K**2*(1 + ecc*np.cos(nu) - (1-ecc**2)/2)/c_light/sini**2 
-            delta_GR = K**2*(1+1/q)*(1+ecc*np.cos(nu))/c_light/sini**2 
+            delta_TD = K**2*(1 + ecc*np.cos(nu) - (1-ecc**2)/2)/c_light/sini**2
+            delta_GR = K**2*(1+1/q)*(1+ecc*np.cos(nu))/c_light/sini**2
             return vr_nonrel + delta_LT + delta_TD + delta_GR
 
 
@@ -1072,7 +1077,7 @@ class RVCompanion(Model):
 
             if q == 0:
                 return V_0 + vrad(t, T_0, P, K, ecc, omdeg, sini, primary=False)
-            
+
             tp = tzero2tperi(T_0,P,sini,ecc,omdeg)
             omega += np.pi
             M = 2*np.pi*(t-tp)/P
@@ -1080,8 +1085,8 @@ class RVCompanion(Model):
             nu = 2*np.arctan(np.sqrt((1+ecc)/(1-ecc))*np.tan(E/2))
             vr_nonrel =  V_0 + K*(np.cos(nu+omega) + ecc*np.cos(omega))
             delta_LT = K**2*np.sin(nu+omega)**2*(1+ecc*np.cos(nu))/c_light
-            delta_TD = K**2*(1 + ecc*np.cos(nu) - (1-ecc**2)/2)/c_light/sini**2 
-            delta_GR = K**2*(1+q)*(1+ecc*np.cos(nu))/c_light/sini**2 
+            delta_TD = K**2*(1 + ecc*np.cos(nu) - (1-ecc**2)/2)/c_light/sini**2
+            delta_GR = K**2*(1+q)*(1+ecc*np.cos(nu))/c_light/sini**2
             return vr_nonrel + delta_LT + delta_TD + delta_GR
 
 
@@ -1097,7 +1102,7 @@ class RVCompanion(Model):
         self.set_param_hint(f'{p}f_s', value=0, vary=False, min=-1, max=1)
         self.set_param_hint(f'{p}sini', value=1, vary=False, min=0, max=1)
         expr = "{p:s}f_c**2 + {p:s}f_s**2".format(p=self.prefix)
-        self.set_param_hint(f'{p}e'.format(p=self.prefix), expr=expr, 
+        self.set_param_hint(f'{p}e'.format(p=self.prefix), expr=expr,
                 min=0, max=1)
         expr = "degrees(atan2({p:s}f_s,{p:s}f_c))".format(p=self.prefix)
         self.set_param_hint(f'{p}omega'.format(p=self.prefix),
@@ -1123,9 +1128,9 @@ class PlanetModel(Model):
     :param h_1:    - I(0.5) = 1 - c*(1-0.5**alpha)
     :param h_2:    - I(0.5) - I(0) = c*0.5**alpha
     :param a_c:    - correction for light travel time across the orbit
-    :param l_3:    - Third light 
+    :param l_3:    - Third light
 
-    The flux level from the star is 1 and is assumed to be constant.  
+    The flux level from the star is 1 and is assumed to be constant.
 
     The reflected light from the planet is computed assuming a Lambertian
     phase function. The fraction of the stellar flux reflected from the planet
@@ -1134,7 +1139,7 @@ class PlanetModel(Model):
 
     .. math::
         A_g(R_p/r)^2  \times  [\sin(\beta) + (\pi-\beta)*\cos(\beta) ]/\pi
- 
+
 
     The transit depth, width shape are parameterised by D, W and b. These
     parameters are defined above in terms of the radius of the star,  R_1 and
@@ -1146,9 +1151,9 @@ class PlanetModel(Model):
 
     The apparent time of mid-eclipse includes the correction a_c for the
     light travel time across the orbit, i.e., for a circular orbit the time of
-    mid-eclipse is (T_0 + 0.5*P) + a_c. 
+    mid-eclipse is (T_0 + 0.5*P) + a_c.
 
-    **N.B.** a_c must have the same units as P. 
+    **N.B.** a_c must have the same units as P.
 
     Stellar limb-darkening is described by the power-2 law:
 
@@ -1158,13 +1163,13 @@ class PlanetModel(Model):
 
     The following parameters are defined for convenience:
 
-    * k = R_2/R_1; 
-    * aR = a/R_1; 
+    * k = R_2/R_1;
+    * aR = a/R_1;
     * A = F_max - F_min = amplitude of thermal phase effect.
     * rho = 0.013418*aR**3/(P/d)**2.
 
     **N.B.** the mean stellar density in solar units is rho, but only if the
-    mass ratio q = M_planet/M_star is q << 1. 
+    mass ratio q = M_planet/M_star is q << 1.
 
     Third light is a constant added to the light curve and the fluxes are
     re-normalised, i.e. PlanetModel = (light_curve + l_3)/(1+l_3)
@@ -1204,7 +1209,7 @@ class PlanetModel(Model):
             if False in np.isfinite(z): return np.ones_like(t)
             # Set z values where planet is behind star to a large nominal
             # value for calculation of the transit
-            zt = z + 0   # copy 
+            zt = z + 0   # copy
             zt[m] = 100
             # Flux from the star including transits
             f_star = qpower2(zt, k, c_2, a_2)
@@ -1265,7 +1270,7 @@ class HotPlanetModel(Model):
     :param D:      - (R_2/R_1)**2 = k**2
     :param W:      - (R_1/a)*sqrt((1+k)**2 - b**2)/pi
     :param b:      - a*cos(i)/R_1
-    :param F_min:  - minimum flux in the thermal phase model 
+    :param F_min:  - minimum flux in the thermal phase model
     :param F_max:  - maximum flux in the thermal phase model
     :param ph_off: - offset phase in the thermal phase model
     :param f_c:    - sqrt(ecc).cos(omega)
@@ -1273,20 +1278,20 @@ class HotPlanetModel(Model):
     :param h_1:    - I(0.5) = 1 - c*(1-0.5**alpha)
     :param h_2:    - I(0.5) - I(0) = c*0.5**alpha
     :param a_c:    - correction for light travel time across the orbit
-    :param l_3:    - Third light 
+    :param l_3:    - Third light
 
-    The flux level from the star is 1 and is assumed to be constant.  
+    The flux level from the star is 1 and is assumed to be constant.
 
     The thermal phase curve from the planet is approximated by a cosine
     function with amplitude A=F_max-F_min plus the minimum flux, F_min, i.e.,
     the maximum flux is F_max = F_min+A, and this occurs at phase (ph_off+0.5)
-    relative to the time of mid-transit, i.e., 
+    relative to the time of mid-transit, i.e.,
 
     .. math::
-    
+
         f_{\rm th} = F_{\rm min} + A[1-\cos(\phi-\phi_{\rm off})]/2
 
-    where :math:`\phi = 2\pi(t-T_0)/P` and 
+    where :math:`\phi = 2\pi(t-T_0)/P` and
     :math:`\phi_{\rm off} = 2\pi\,{\rm ph\_off}`.
 
     The transit depth, width shape are parameterised by D, W and b. These
@@ -1299,9 +1304,9 @@ class HotPlanetModel(Model):
 
     The apparent time of mid-eclipse includes the correction a_c for the
     light travel time across the orbit, i.e., for a circular orbit the time of
-    mid-eclipse is (T_0 + 0.5*P) + a_c. 
+    mid-eclipse is (T_0 + 0.5*P) + a_c.
 
-    **N.B.** a_c must have the same units as P. 
+    **N.B.** a_c must have the same units as P.
 
     Stellar limb-darkening is described by the power-2 law:
 
@@ -1311,13 +1316,13 @@ class HotPlanetModel(Model):
 
     The following parameters are defined for convenience:
 
-    * k = R_2/R_1; 
-    * aR = a/R_1; 
+    * k = R_2/R_1;
+    * aR = a/R_1;
     * A = F_max - F_min = amplitude of thermal phase effect.
     * rho = 0.013418*aR**3/(P/d)**2.
 
     **N.B.** the mean stellar density in solar units is rho, but only if the
-    mass ratio q = M_planet/M_star is q << 1. 
+    mass ratio q = M_planet/M_star is q << 1.
 
     Third light is a constant added to the light curve and the fluxes are
     re-normalised, i.e. HotPlanetModel = (light_curve + l_3)/(1+l_3)
@@ -1333,7 +1338,7 @@ class HotPlanetModel(Model):
                 h_1, h_2, a_c, l_3):
             if (D <= 0) or (D > 0.25) or (W <= 0) or (b < 0):
                 return np.ones_like(t)
-            if (F_min < 0): 
+            if (F_min < 0):
                 return np.ones_like(t)
             if ((1-abs(f_c)) <= 0) or ((1-abs(f_s)) <= 0):
                 return np.ones_like(t)
@@ -1359,7 +1364,7 @@ class HotPlanetModel(Model):
             if False in np.isfinite(z): return np.ones_like(t)
             # Set z values where planet is behind star  1 to a large nominal
             # value for calculation of the transit
-            zt = z + 0   # copy 
+            zt = z + 0   # copy
             zt[m] = 100
             # Flux from the star including transits
             f_star = qpower2(zt, k, c_2, a_2)
@@ -1425,7 +1430,7 @@ class EBLMModel(Model):
     :param h_1: - I(0.5) = 1 - c*(1-0.5**alpha)
     :param h_2: - I(0.5) - I(0) = c*0.5**alpha
     :param a_c: - correction for light travel time across the orbit
-    :param l_3:  - Third light 
+    :param l_3:  - Third light
 
     The transit depth, width shape are parameterised by D, W and b. These
     parameters are defined above in terms of the radii of the stars,  R_1 and
@@ -1444,8 +1449,8 @@ class EBLMModel(Model):
 
     The following parameters are defined for convenience:
 
-    * k = R_2/R_1; 
-    * aR = a/R_1; 
+    * k = R_2/R_1;
+    * aR = a/R_1;
     * J = L/D (surface brightness ratio).
 
     The flux level outside of eclipse is 1 and inside eclipse is (1-L), i.e.
@@ -1464,7 +1469,7 @@ class EBLMModel(Model):
         def _eblm_func(t, T_0, P, D, W, b, L, f_c, f_s, h_1, h_2, a_c, l_3):
             if (D <= 0) or (D > 0.25) or (W <= 0) or (b < 0):
                 return np.ones_like(t)
-            if (L <= 0) or (L >= 1): 
+            if (L <= 0) or (L >= 1):
                 return np.ones_like(t)
             if ((1-abs(f_c)) <= 0) or ((1-abs(f_s)) <= 0):
                 return np.ones_like(t)
@@ -1539,17 +1544,17 @@ class SpotCrossingModel(Model):
     :param t:      - independent variable (time)
     :param t0:     - mid-point of spot crossing event
     :param a:      - amplitude of spot crossing event (a > 0)
-    :param w:      - half-width of spot crossing event (w > 0) 
+    :param w:      - half-width of spot crossing event (w > 0)
     :param f:      - flattening parameter  (0 <= f <= 1)
-    :param s:      - skew parameter (-1 <= s <= 1) 
+    :param s:      - skew parameter (-1 <= s <= 1)
 
     This is a simple model for the "bumps" in transit light curves due to the
     companion crossing a dark spot. The model is a polynomial function within
-    the range -1 < d < 1, where d = (t-t0)/w, and is 0 otherwise. 
+    the range -1 < d < 1, where d = (t-t0)/w, and is 0 otherwise.
 
     .. math::
         a*(1 + s*(d**3-d)-(1-f)*d**2 - f*d**8)*(abs(d)<1)
- 
+
     Returns 0 for all values of t if any parameter is out of range.
 
     """
