@@ -4237,7 +4237,14 @@ class Dataset(object):
     def decorr(self, dfdt=False, d2fdt2=False, dfdx=False, d2fdx2=False,
                 dfdy=False, d2fdy2=False, d2fdxdy=False, dfdsinphi=False,
                 dfdcosphi=False, dfdsin2phi=False, dfdcos2phi=False,
-                dfdsin3phi=False, dfdcos3phi=False, dfdbg=False,
+                dfdsin3phi=False, dfdcos3phi=False,
+                dfdsin4phi=False, dfdcos4phi=False,
+                dfdsin5phi=False, dfdcos5phi=False,
+                dfdsin6phi=False, dfdcos6phi=False,
+                dfdsin7phi=False, dfdcos7phi=False,
+                dfdsin8phi=False, dfdcos8phi=False,
+                dfdsin9phi=False, dfdcos9phi=False,
+                dfdsin10phi=False, dfdcos10phi=False, dfdbg=False,
                 dfdcontam=False, dfdsmear=False, scale=True):
 
         time = np.array(self.lc['time'])
@@ -4265,6 +4272,20 @@ class Dataset(object):
         params.add('dfdcos2phi', value=0, vary=dfdcos2phi)
         params.add('dfdsin3phi', value=0, vary=dfdsin3phi)
         params.add('dfdcos3phi', value=0, vary=dfdcos3phi)
+        params.add('dfdsin4phi', value=0, vary=dfdsin4phi)
+        params.add('dfdcos4phi', value=0, vary=dfdcos4phi)
+        params.add('dfdsin5phi', value=0, vary=dfdsin5phi)
+        params.add('dfdcos5phi', value=0, vary=dfdcos5phi)
+        params.add('dfdsin6phi', value=0, vary=dfdsin6phi)
+        params.add('dfdcos6phi', value=0, vary=dfdcos6phi)
+        params.add('dfdsin7phi', value=0, vary=dfdsin7phi)
+        params.add('dfdcos7phi', value=0, vary=dfdcos7phi)
+        params.add('dfdsin8phi', value=0, vary=dfdsin8phi)
+        params.add('dfdcos8phi', value=0, vary=dfdcos8phi)
+        params.add('dfdsin9phi', value=0, vary=dfdsin9phi)
+        params.add('dfdcos9phi', value=0, vary=dfdcos9phi)
+        params.add('dfdsin10phi', value=0, vary=dfdsin10phi)
+        params.add('dfdcos10phi', value=0, vary=dfdcos10phi)
         params.add('dfdbg', value=0, vary=dfdbg)
         params.add('dfdcontam', value=0, vary=dfdcontam)
         params.add('dfdsmear', value=0, vary=dfdsmear)
@@ -4299,7 +4320,9 @@ class Dataset(object):
 
 #-----------------------------------
     def should_I_decorr(self,mask_centre=0,mask_width=0,scale=True):
-
+        '''
+        30-4-25 - GB: Added up to 9th harmonic
+        '''
         flux = np.array(self.lc['flux'])
         flux_err = np.array(self.lc['flux_err'])
         phi = self.lc['roll_angle']*np.pi/180
@@ -4351,6 +4374,10 @@ class Dataset(object):
 
         params_d = ['dfdt', 'dfdx', 'dfdy', 'dfdsinphi', 'dfdcosphi', 'dfdbg', 'dfdcontam',
                     'dfdsmear', 'd2fdt2', 'd2fdx2', 'd2fdy2', 'dfdsin2phi', 'dfdcos2phi']
+        for hh in range(3, 11):
+            params_d.append('dfdsin' + str(hh) + 'phi')
+            params_d.append('dfdcos' + str(hh) + 'phi')
+
         boolean = [[False, True]]*len(params_d)
         decorr_arr = [[]]*len(params_d)
 
@@ -4378,6 +4405,22 @@ class Dataset(object):
             d2fdy2=decorr_arr[10][index]
             dfdsin2phi=decorr_arr[11][index]
             dfdcos2phi=decorr_arr[12][index]
+            dfdsin3phi=decorr_arr[13][index]
+            dfdcos3phi=decorr_arr[14][index]
+            dfdsin4phi=decorr_arr[15][index]
+            dfdcos4phi=decorr_arr[16][index]
+            dfdsin5phi=decorr_arr[17][index]
+            dfdcos5phi=decorr_arr[18][index]
+            dfdsin6phi=decorr_arr[19][index]
+            dfdcos6phi=decorr_arr[20][index]
+            dfdsin7phi=decorr_arr[21][index]
+            dfdcos7phi=decorr_arr[22][index]
+            dfdsin8phi=decorr_arr[23][index]
+            dfdcos8phi=decorr_arr[24][index]
+            dfdsin9phi=decorr_arr[25][index]
+            dfdcos9phi=decorr_arr[26][index]
+            dfdsin10phi=decorr_arr[27][index]
+            dfdcos10phi=decorr_arr[28][index]
 
             model = self.__factor_model__(scale)
             params = model.make_params()
@@ -4394,6 +4437,22 @@ class Dataset(object):
             params.add('d2fdy2', value=0, vary=d2fdy2)
             params.add('dfdsin2phi', value=0, vary=dfdsin2phi)
             params.add('dfdcos2phi', value=0, vary=dfdcos2phi)
+            params.add('dfdsin3phi', value=0, vary=dfdsin3phi)
+            params.add('dfdcos3phi', value=0, vary=dfdcos3phi)
+            params.add('dfdsin4phi', value=0, vary=dfdsin4phi)
+            params.add('dfdcos4phi', value=0, vary=dfdcos4phi)
+            params.add('dfdsin5phi', value=0, vary=dfdsin5phi)
+            params.add('dfdcos5phi', value=0, vary=dfdcos5phi)
+            params.add('dfdsin6phi', value=0, vary=dfdsin6phi)
+            params.add('dfdcos6phi', value=0, vary=dfdcos6phi)
+            params.add('dfdsin7phi', value=0, vary=dfdsin7phi)
+            params.add('dfdcos7phi', value=0, vary=dfdcos7phi)
+            params.add('dfdsin8phi', value=0, vary=dfdsin8phi)
+            params.add('dfdcos8phi', value=0, vary=dfdcos8phi)
+            params.add('dfdsin9phi', value=0, vary=dfdsin9phi)
+            params.add('dfdcos9phi', value=0, vary=dfdcos9phi)
+            params.add('dfdsin10phi', value=0, vary=dfdsin10phi)
+            params.add('dfdcos10phi', value=0, vary=dfdcos10phi)
 
             result = model.fit(flux, params, t=time)
 
@@ -4405,7 +4464,11 @@ class Dataset(object):
                     min_BIC = copy(result.bic)
                     decorr_params = []
                     for xindex, x in enumerate([dfdt, dfdx, dfdy, dfdsinphi, dfdcosphi, dfdbg, dfdcontam,
-                                                dfdsmear, d2fdt2, d2fdx2, d2fdy2, dfdsin2phi, dfdcos2phi]):
+                                                dfdsmear, d2fdt2, d2fdx2, d2fdy2, dfdsin2phi, dfdcos2phi,
+                                                dfdsin3phi, dfdcos3phi, dfdsin4phi, dfdcos4phi,
+                                                dfdsin5phi, dfdcos5phi, dfdsin6phi, dfdcos6phi,
+                                                dfdsin7phi, dfdcos7phi, dfdsin8phi, dfdcos8phi,
+                                                dfdsin9phi, dfdcos9phi, dfdsin10phi, dfdcos10phi]):
                         if x == True:
                             if params_d[xindex] == "dfdsinphi":
                                 decorr_params.append("dfdsinphi")
@@ -4422,6 +4485,70 @@ class Dataset(object):
                                 decorr_params.append("dfdsin2phi")
                                 decorr_params.append("dfdcos2phi")
                             elif params_d[xindex] == "dfdcos2phi" and "dfdcos2phi" in decorr_params:
+                                continue
+                            elif params_d[xindex] == "dfdsin3phi":
+                                decorr_params.append("dfdsin3phi")
+                                decorr_params.append("dfdcos3phi")
+                            elif params_d[xindex] == "dfdcos3phi" and "dfdsin3phi" not in decorr_params:
+                                decorr_params.append("dfdsin3phi")
+                                decorr_params.append("dfdcos3phi")
+                            elif params_d[xindex] == "dfdcos3phi" and "dfdcos3phi" in decorr_params:
+                                continue
+                            elif params_d[xindex] == "dfdsin4phi":
+                                decorr_params.append("dfdsin4phi")
+                                decorr_params.append("dfdcos4phi")
+                            elif params_d[xindex] == "dfdcos4phi" and "dfdsin4phi" not in decorr_params:
+                                decorr_params.append("dfdsin4phi")
+                                decorr_params.append("dfdcos4phi")
+                            elif params_d[xindex] == "dfdcos4phi" and "dfdcos4phi" in decorr_params:
+                                continue
+                            elif params_d[xindex] == "dfdsin5phi":
+                                decorr_params.append("dfdsin5phi")
+                                decorr_params.append("dfdcos5phi")
+                            elif params_d[xindex] == "dfdcos5phi" and "dfdsin5phi" not in decorr_params:
+                                decorr_params.append("dfdsin5phi")
+                                decorr_params.append("dfdcos5phi")
+                            elif params_d[xindex] == "dfdcos5phi" and "dfdcos5phi" in decorr_params:
+                                continue
+                            elif params_d[xindex] == "dfdsin6phi":
+                                decorr_params.append("dfdsin6phi")
+                                decorr_params.append("dfdcos6phi")
+                            elif params_d[xindex] == "dfdcos6phi" and "dfdsin6phi" not in decorr_params:
+                                decorr_params.append("dfdsin6phi")
+                                decorr_params.append("dfdcos6phi")
+                            elif params_d[xindex] == "dfdcos6phi" and "dfdcos6phi" in decorr_params:
+                                continue
+                            elif params_d[xindex] == "dfdsin7phi":
+                                decorr_params.append("dfdsin7phi")
+                                decorr_params.append("dfdcos7phi")
+                            elif params_d[xindex] == "dfdcos7phi" and "dfdsin7phi" not in decorr_params:
+                                decorr_params.append("dfdsin7phi")
+                                decorr_params.append("dfdcos7phi")
+                            elif params_d[xindex] == "dfdcos7phi" and "dfdcos7phi" in decorr_params:
+                                continue
+                            elif params_d[xindex] == "dfdsin8phi":
+                                decorr_params.append("dfdsin8phi")
+                                decorr_params.append("dfdcos8phi")
+                            elif params_d[xindex] == "dfdcos8phi" and "dfdsin8phi" not in decorr_params:
+                                decorr_params.append("dfdsin8phi")
+                                decorr_params.append("dfdcos8phi")
+                            elif params_d[xindex] == "dfdcos8phi" and "dfdcos8phi" in decorr_params:
+                                continue
+                            elif params_d[xindex] == "dfdsin9phi":
+                                decorr_params.append("dfdsin9phi")
+                                decorr_params.append("dfdcos9phi")
+                            elif params_d[xindex] == "dfdcos9phi" and "dfdsin9phi" not in decorr_params:
+                                decorr_params.append("dfdsin9phi")
+                                decorr_params.append("dfdcos9phi")
+                            elif params_d[xindex] == "dfdcos9phi" and "dfdcos9phi" in decorr_params:
+                                continue
+                            elif params_d[xindex] == "dfdsin10phi":
+                                decorr_params.append("dfdsin10phi")
+                                decorr_params.append("dfdcos10phi")
+                            elif params_d[xindex] == "dfdcos10phi" and "dfdsin10phi" not in decorr_params:
+                                decorr_params.append("dfdsin10phi")
+                                decorr_params.append("dfdcos10phi")
+                            elif params_d[xindex] == "dfdcos10phi" and "dfdcos10phi" in decorr_params:
                                 continue
                             else:
                                 decorr_params.append(params_d[xindex])

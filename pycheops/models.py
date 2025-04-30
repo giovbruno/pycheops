@@ -778,7 +778,10 @@ class FactorModel(Model):
                 dfdx=0, dfdy=0, d2fdxdy=0, d2fdx2=0, d2fdy2=0,
                 dfdcosphi=0, dfdsinphi=0, dfdcos2phi=0, dfdsin2phi=0,
                 dfdcos3phi=0, dfdsin3phi=0, dfdcos4phi=0, dfdsin4phi=0,
-                dfdcos5phi=0, dfdsin5phi=0, **kwargs):
+                dfdcos5phi=0, dfdsin5phi=0, dfdcos6phi=0, dfdsin6phi=0,
+                dfdcos7phi=0, dfdsin7phi=0, dfdcos8phi=0, dfdsin8phi=0,
+                dfdcos9phi=0, dfdsin9phi=0, dfdcos10phi=0, dfdsin10phi=0,
+                **kwargs):
 
             dt = t - np.median(t)
             trend = 1 + dfdt*dt + d2fdt2*dt**2
@@ -812,24 +815,55 @@ class FactorModel(Model):
                 if dfdcos3phi != 0:
                     trend += dfdcos3phi*(4*cosphit**3 - 3*cosphit)
                 if dfdsin4phi != 0:
-                    #trend += dfdsin4phi*(8*sinphit*cosphit \
-                    #                            - 2*sinphit**3*cosphit)
                     trend += dfdsin4phi*4*(cosphit**3*sinphit \
                                             - cosphit*sinphit**3)
                 if dfdcos4phi != 0:
-                    #trend += dfdcos4phi*(1 - 8*sinphit**2 + 8*sinphit**4)
                     trend += dfdcos4phi*(cosphit**4 - 6*sinphit**2*cosphit**2 \
                             + sinphit**4)
                 if dfdsin5phi != 0:
-                    #trend += dfdsin5phi*(3*sinphit - 10*sinphit**3 \
-                    #            + 8*sinphit**5 - 6*sinphit*cosphit**2 \
-                    #            - 8*sinphit*cosphit**4)
                     trend += dfdsin5phi*(5*cosphit**4*sinphit \
                             - 10*cosphit**2*sinphit**3 + sinphit**5)
                 if dfdcos5phi != 0:
-                    #trend += dfdcos5phi*(5*cosphit - 12*cosphit**3)
                     trend += dfdcos5phi*(cosphit**5 - 10*cosphit**3*sinphit**2 \
                             + 5*cosphit*sinphit**4)
+                if dfdsin6phi != 0:
+                    trend += dfdsin6phi*(6*cosphit**5*sinphit \
+                            - 20*cosphit**3*sinphit**3 + 6*cosphit*sinphit**5)
+                if dfdcos6phi != 0:
+                    trend += dfdcos6phi*(-1*sinphit**6 \
+                        + 15*cosphit**2*sinphit**4 - 15*cosphit**4*sinphit**2 \
+                        + cosphit**6)
+                if dfdsin7phi != 0:
+                    trend += dfdsin7phi*(7*cosphit**6*sinphit
+                            - 35*cosphit**4*sinphit**3 \
+                            + 21*cosphit**2*sinphit**5 - sinphit**7)
+                if dfdcos7phi != 0:
+                    trend += dfdcos7phi*(-7*cosphit + 56*cosphit**3 \
+                            - 112*cosphit**5 + 64*cosphit**7)
+                if dfdsin8phi != 0:
+                    trend += dfdsin8phi*(-8*cosphit*sinphit**7 \
+                        + 56*cosphit**3*sinphit**5 - 56*cosphit**5*sinphit**3 \
+                        + 8*cosphit**7*sinphit)
+                if dfdcos8phi != 0:
+                    trend += dfdcos8phi*(sinphit**8 - 28*cosphit**2*sinphit**6 \
+                        + 70*cosphit**4*sinphit**4 - 28*cosphit**6*sinphit**2 \
+                        + cosphit**8)
+                if dfdsin9phi != 0:
+                    trend += dfdsin9phi*(sinphit**9 + 9*sinphit*cosphit**8 \
+                        - 84*sinphit**3*cosphit**6 + 126*sinphit**5*cosphit**4 \
+                        + 36*sinphit**7*cosphit**2)
+                if dfdcos9phi != 0:
+                    trend += dfdcos9phi*(cosphit**9 - 36*sinphit**2*cosphit**7 \
+                        + 126*sinphit**4*cosphit**5 - 84*sinphit**6*cosphit**3 \
+                        + 9*sinphit**8*cosphit)
+                if dfdsin10phi != 0:
+                    trend += dfdsin10phi*(10*sinphit*cosphit**9 \
+                        - 120*sinphit*3*cosphit**7 + 252*sinphit**5*cosphit**5 \
+                        - 120*sinphit**7*cosphit**3 + 10*sinphit**9*cosphit)
+                if dfdcos10phi != 0:
+                    trend += dfdcos10phi*(-1*sinphit**10 + cosphit**10 \
+                        - 45*sinphit**2*cosphit**8 + 210*sinphit**4*cosphit**6 \
+                        - 210*sinphit**6*cosphit**4 + 45*sinphit**8*cosphit**2)
 
             for p in self.extra_basis_funcs:
                 trend += kwargs['dfd'+p]*self.extra_basis_funcs[p](t)
@@ -846,10 +880,14 @@ class FactorModel(Model):
         self.sinphi = sinphi
         self.cosphi = cosphi
         self.set_param_hint('c', min=0)
-        for p in ['dfdt', 'd2fdt2', 'dfdbg', 'dfdcontam', 'dfdsmear',
+        params_ = ['dfdt', 'd2fdt2', 'dfdbg', 'dfdcontam', 'dfdsmear',
                   'dfdx', 'dfdy', 'd2fdx2', 'd2fdxdy',  'd2fdy2', 'ramp',
                   'dfdsinphi', 'dfdcosphi', 'dfdcos2phi', 'dfdsin2phi',
-                  'dfdcos3phi', 'dfdsin3phi']:
+                  'dfdcos3phi', 'dfdsin3phi']
+        for hh in range(4, 11):
+            params_.append('dfdsin' + str(hh) + 'phi')
+            params_.append('dfdcos' + str(hh) + 'phi')
+        for p in params_:
             self.set_param_hint(p, value=0, vary=False)
 
         # Extra basis functions
