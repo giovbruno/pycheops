@@ -79,6 +79,7 @@ from textwrap import fill, indent
 import os
 from contextlib import redirect_stderr
 from dace_query.cheops import Cheops
+from pdb import set_trace
 
 _file_key_re = re.compile(r'CH_PR(\d{2})(\d{4})_TG(\d{4})(\d{2})_V(\d{4})')
 _file_key_reT = re.compile(r'TIC_(\d{10})_SEC(\d{4})_V(\d{4})')
@@ -4319,10 +4320,13 @@ class Dataset(object):
         return flux_d, flux_err_d, result
 
 #-----------------------------------
-    def should_I_decorr(self,mask_centre=0,mask_width=0,scale=True):
+    def should_I_decorr(self,mask_centre=0,mask_width=0,scale=True,n_harmonics=9):
         '''
-        30-4-25 - GB: Added up to 9th harmonic
+        30-4-25 - GB: Added up to 9th harmonic.
+
+        n_harmonics: min is 0, i.e. test only for dfdsinphi and dfdcosphi.
         '''
+
         flux = np.array(self.lc['flux'])
         flux_err = np.array(self.lc['flux_err'])
         phi = self.lc['roll_angle']*np.pi/180
@@ -4391,7 +4395,9 @@ class Dataset(object):
                 decorr_arr[kindex].append(False)
                 decorr_arr[kindex].append(True)
 
+
         for index, i in enumerate(decorr_arr[0]):
+
             dfdt=decorr_arr[0][index]
             dfdx=decorr_arr[1][index]
             dfdy=decorr_arr[2][index]
@@ -4453,6 +4459,12 @@ class Dataset(object):
             params.add('dfdcos9phi', value=0, vary=dfdcos9phi)
             params.add('dfdsin10phi', value=0, vary=dfdsin10phi)
             params.add('dfdcos10phi', value=0, vary=dfdcos10phi)
+
+            # A bit dirty, but put to False all harminics larger than n_harmonics
+            for nh in range(2, 11):
+                if nh > n_harmonics + 1:
+                    params['dfdsin' + str(nh) + 'phi'].vary = False
+                    params['dfdcos' + str(nh) + 'phi'].vary = False
 
             result = model.fit(flux, params, t=time)
 
