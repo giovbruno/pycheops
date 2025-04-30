@@ -795,7 +795,7 @@ class Dataset(object):
         return self(file_key=file_key, target=target, verbose=verbose)
     #------
 
-    def save(self, tag="", overwrite=False):
+    def save(self, output_dir="", tag="", overwrite=False):
         """
         Save the current Dataset instance as a pickle file
 
@@ -805,7 +805,8 @@ class Dataset(object):
 
         :returns: pickle file name
         """
-        fl = self.target.replace(" ","_")+'_'+tag+'_'+self.file_key+'.dataset'
+        fl = output_dir \
+            + self.target.replace(" ","_")+'_'+tag+'_'+self.file_key+'.dataset'
         if os.path.isfile(fl) and not overwrite:
             msg = f'File {fl} exists. If you mean to replace it then '
             msg += 'use the argument "overwrite=True".'

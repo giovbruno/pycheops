@@ -811,7 +811,25 @@ class FactorModel(Model):
                     trend += dfdsin3phi*(3*sinphit - 4* sinphit**3)
                 if dfdcos3phi != 0:
                     trend += dfdcos3phi*(4*cosphit**3 - 3*cosphit)
-
+                if dfdsin4phi != 0:
+                    #trend += dfdsin4phi*(8*sinphit*cosphit \
+                    #                            - 2*sinphit**3*cosphit)
+                    trend += dfdsin4phi*4*(cosphit**3*sinphit \
+                                            - cosphit*sinphit**3)
+                if dfdcos4phi != 0:
+                    #trend += dfdcos4phi*(1 - 8*sinphit**2 + 8*sinphit**4)
+                    trend += dfdcos4phi*(cosphit**4 - 6*sinphit**2*cosphit**2 \
+                            + sinphit**4)
+                if dfdsin5phi != 0:
+                    #trend += dfdsin5phi*(3*sinphit - 10*sinphit**3 \
+                    #            + 8*sinphit**5 - 6*sinphit*cosphit**2 \
+                    #            - 8*sinphit*cosphit**4)
+                    trend += dfdsin5phi*(5*cosphit**4*sinphit \
+                            - 10*cosphit**2*sinphit**3 + sinphit**5)
+                if dfdcos5phi != 0:
+                    #trend += dfdcos5phi*(5*cosphit - 12*cosphit**3)
+                    trend += dfdcos5phi*(cosphit**5 - 10*cosphit**3*sinphit**2 \
+                            + 5*cosphit*sinphit**4)
 
             for p in self.extra_basis_funcs:
                 trend += kwargs['dfd'+p]*self.extra_basis_funcs[p](t)
