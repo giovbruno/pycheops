@@ -4320,7 +4320,8 @@ class Dataset(object):
         return flux_d, flux_err_d, result
 
 #-----------------------------------
-    def should_I_decorr(self,mask_centre=0,mask_width=0,scale=True,n_harmonics=9):
+    def should_I_decorr(self,mask_centre=0,mask_width=0,scale=True,\
+                    n_harmonics=9,verbose=False):
         '''
         30-4-25 - GB: Added up to 9th harmonic.
 
@@ -4472,6 +4473,10 @@ class Dataset(object):
                 min_BIC = copy(result.bic)
                 decorr_params = []
             else:
+                if verbose:
+                    jump_params = [p for p in params if params[p].vary]
+                    print(jump_params, ': Delta BIC =', result.bic - min_BIC)
+
                 if result.bic < min_BIC - 10.:
                     min_BIC = copy(result.bic)
                     decorr_params = []
