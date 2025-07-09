@@ -4246,7 +4246,7 @@ class Dataset(object):
                 dfdsin8phi=False, dfdcos8phi=False,
                 dfdsin9phi=False, dfdcos9phi=False,
                 dfdsin10phi=False, dfdcos10phi=False, dfdbg=False,
-                dfdcontam=False, dfdsmear=False, scale=True):
+                dfdcontam=False, dfdsmear=False, scale=True, weights=False):
 
         time = np.array(self.lc['time'])
         flux = np.array(self.lc['flux'])
@@ -4291,7 +4291,10 @@ class Dataset(object):
         params.add('dfdcontam', value=0, vary=dfdcontam)
         params.add('dfdsmear', value=0, vary=dfdsmear)
 
-        result = model.fit(flux, params, t=time)
+        if not weights:
+            result = model.fit(flux, params, t=time)
+        else:
+            result = model.fit(flux, params, t=time, weights=flux_err**-1)
         print("Fit Report")
         print(result.fit_report())
         result.plot()
