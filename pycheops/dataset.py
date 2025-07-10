@@ -4324,7 +4324,7 @@ class Dataset(object):
 
 #-----------------------------------
     def should_I_decorr(self,mask_centre=0,mask_width=0,scale=True,\
-                    n_harmonics=9,verbose=False):
+                    n_harmonics=9,verbose=False, weights=False):
         '''
         30-4-25 - GB: Added up to 9th harmonic.
 
@@ -4470,7 +4470,10 @@ class Dataset(object):
                     params['dfdsin' + str(nh) + 'phi'].vary = False
                     params['dfdcos' + str(nh) + 'phi'].vary = False
 
-            result = model.fit(flux, params, t=time)
+            if not weights:
+                result = model.fit(flux, params, t=time)
+            else:
+                result = model.fit(flux, params, t=time, weights=flux_err**-1)
 
             if index == 0:
                 min_BIC = copy(result.bic)
